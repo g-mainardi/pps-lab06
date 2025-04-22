@@ -47,7 +47,6 @@ enum List[A]:
     case h :: t => t.foldLeft(h)(op)
 
   // Exercise: implement the following methods
-  def takeRight(n: Int): List[A] = ???
   def zipWithValue[B](value: B): List[(A, B)] =
     foldRight(Nil())((_, value) :: _)
   def length(): Int =
@@ -72,6 +71,8 @@ enum List[A]:
     case _ => init
   def spanV2(predicate: A => Boolean): (List[A], List[A]) =
     untilDo((Nil(), this))(predicate)((h, acc) => (h :: acc._1, acc._2.tail.get))
+  def takeRight(n: Int): List[A] =
+    foldRight(Nil[A](), n)((h, acc) => (if acc._2 > 0 then h :: acc._1 else acc._1, acc._2 - 1))._1
 // Factories
 object List:
 
