@@ -45,7 +45,6 @@ enum List[A]:
     case h :: t => t.foldLeft(h)(op)
 
   // Exercise: implement the following methods
-  def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
   def zipWithValue[B](value: B): List[(A, B)] =
@@ -56,6 +55,10 @@ enum List[A]:
     foldRight(Nil[(A, Int)](), length() - 1)((h, acc) => ((h, acc._2) :: acc._1, acc._2 - 1))._1
   def zipWithIndexInefficient: List[(A, Int)] =
     foldRight(Nil())((h, acc) => (h, this.length() - acc.length() - 1) :: acc)
+  def partition(predicate: A => Boolean): (List[A], List[A]) =
+    foldRight(Nil(), Nil())((h, acc) => if predicate(h) then (h :: acc._1, acc._2) else (acc._1, h :: acc._2))
+  def partitionWithFilter(predicate: A => Boolean): (List[A], List[A]) =
+    (filter(predicate), filter(!predicate(_)))
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
 object List:
