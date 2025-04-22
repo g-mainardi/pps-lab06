@@ -59,7 +59,6 @@ enum List[A]:
     foldRight(Nil(), Nil())((h, acc) => if predicate(h) then (h :: acc._1, acc._2) else (acc._1, h :: acc._2))
   def partitionWithFilter(predicate: A => Boolean): (List[A], List[A]) =
     (filter(predicate), filter(!predicate(_)))
-  def collect(predicate: PartialFunction[A, A]): List[A] = ???
   def span(predicate: A => Boolean): (List[A], List[A]) =
     @tailrec
     def _span(acc: List[A], rest: List[A]): (List[A], List[A]) = rest match
@@ -73,6 +72,8 @@ enum List[A]:
     untilDo((Nil(), this))(predicate)((h, acc) => (h :: acc._1, acc._2.tail.get))
   def takeRight(n: Int): List[A] =
     foldRight(Nil[A](), n)((h, acc) => (if acc._2 > 0 then h :: acc._1 else acc._1, acc._2 - 1))._1
+  def collect(predicate: PartialFunction[A, A]): List[A] =
+    foldRight(Nil())((h, acc) => if predicate.isDefinedAt(h) then predicate(h) :: acc else acc)
 // Factories
 object List:
 
