@@ -1,5 +1,7 @@
 package ex1
 
+import scala.annotation.tailrec
+
 // List as a pure interface
 enum List[A]:
   case ::(h: A, t: List[A])
@@ -45,7 +47,6 @@ enum List[A]:
     case h :: t => t.foldLeft(h)(op)
 
   // Exercise: implement the following methods
-  def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
   def zipWithValue[B](value: B): List[(A, B)] =
     foldRight(Nil())((_, value) :: _)
@@ -60,6 +61,17 @@ enum List[A]:
   def partitionWithFilter(predicate: A => Boolean): (List[A], List[A]) =
     (filter(predicate), filter(!predicate(_)))
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
+  def span(predicate: A => Boolean): (List[A], List[A]) =
+    @tailrec
+    def _span(acc: List[A], rest: List[A]): (List[A], List[A]) = rest match
+      case h :: t if predicate(h) => _span(h :: acc, t)
+      case _ => (acc, rest)
+    _span(Nil(), this)
+  def untilDo[B](init: B)(splitter: A => Boolean)(op: (A, B) => B): B = this match
+    case h :: t if splitter(h) => t.untilDo(op(h, init))(splitter)(op)
+    case _ => init
+  def spanV2(predicate: A => Boolean): (List[A], List[A]) =
+    untilDo((Nil(), this))(predicate)((h, acc) => (h :: acc._1, acc._2.tail.get))
 // Factories
 object List:
 
