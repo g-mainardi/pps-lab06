@@ -74,6 +74,14 @@ enum List[A]:
     foldRight(Nil[A](), n)((h, acc) => (if acc._2 > 0 then h :: acc._1 else acc._1, acc._2 - 1))._1
   def collect(predicate: PartialFunction[A, A]): List[A] =
     foldRight(Nil())((h, acc) => if predicate.isDefinedAt(h) then predicate(h) :: acc else acc)
+  def foldRightBranch[B](init: B)(brancher: (A, B) => Boolean)(op1: (A, B) => B, op2: (A, B) => B = (_, acc: B) => acc): B =
+    foldRight(init)((h, acc) => if brancher(h, acc) then op1(h, acc) else op2(h, acc))
+  def partitionV2(predicate: A => Boolean): (List[A], List[A]) =
+    foldRightBranch(Nil[A](), Nil[A]())((h, acc) => predicate(h))((h, acc) => (h :: acc._1, acc._2), (h, acc) => (acc._1, h :: acc._2))
+  def takeRightV2(n: Int): List[A] =
+    foldRightBranch(Nil[A](), n)((_, acc) => acc._2 > 0)((h, acc) => (h :: acc._1, acc._2 - 1))._1
+  def collectV2(predicate: PartialFunction[A, A]): List[A] =
+    foldRightBranch(Nil[A]())((h, acc) => predicate.isDefinedAt(h))((h, acc) => predicate(h) :: acc)
 // Factories
 object List:
 
