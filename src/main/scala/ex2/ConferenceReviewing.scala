@@ -80,6 +80,8 @@ trait ConferenceReviewing {
 class ConferenceReviewingImpl extends ConferenceReviewing {
   import ConferenceReviewing.*
   import Question.*
+  val minAvgScore: Score = score(5)
+  val minRelevanceScore: Score = score(8)
   private var articles: List[(Article, Map[Question, Score])] = List()
 
   override def loadReview(article: Article, scores: Map[Question, Score]): Unit = articles = (article, scores) :: articles
@@ -101,9 +103,21 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
   override def averageFinalScore(article: Article): Score =
     getScores(article, FINAL).reduce(_ + _) / articles.count(_._1 == article)
 
-  override def sortedAcceptedArticles: List[(Article, Score)] = ???
+  private def acceptedArticlesWithScores: Set[(Article, Score)] =
+    articles
+      .map((a, q) => (a, q, averageFinalScore(a)))
+      .filter(_._3 > minAvgScore)
+      .filter(_._2(RELEVANCE) >= minRelevanceScore)
+      .map((a, _, s) => (a, s))
+      .toSet
+
+  override def acceptedArticles: Set[Article] =
+    acceptedArticlesWithScores.map(_._1)
 
   override def averageWeightedFinalScoreMap: Map[Article, Score] = ???
+  override def sortedAcceptedArticles: List[(Article, Score)] =
+    acceptedArticlesWithScores.toList.sortBy(_._2)
+
 }
 
 /**
