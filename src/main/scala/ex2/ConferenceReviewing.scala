@@ -17,6 +17,22 @@ object ConferenceReviewing {
 
   def article(id: Int): Article = id
   def score(value: Int | Double): Score = value
+
+  extension (x: Score)
+    def toDouble: Double = x match
+      case i: Int => i.toDouble
+      case d: Double => d
+    def >(y: Score): Boolean = x.toDouble > y.toDouble
+    def <(y: Score): Boolean = x.toDouble < y.toDouble
+    def >=(y: Score): Boolean = x.toDouble >= y.toDouble
+    def <=(y: Score): Boolean = x.toDouble <= y.toDouble
+    def +(y: Score): Score = x.toDouble + y.toDouble
+    def *(y: Score): Score = x.toDouble * y.toDouble
+    def /(y: Int): Score = x.toDouble / y
+
+  given Ordering[Score] with {
+    def compare(x: Score, y: Score): Int = x.toDouble compare y.toDouble
+  }
 }
 
 trait ConferenceReviewing {
@@ -62,7 +78,6 @@ trait ConferenceReviewing {
 }
 
 class ConferenceReviewingImpl extends ConferenceReviewing {
-  export ConferenceReviewing.*
   import ConferenceReviewing.*
   import Question.*
   private var articles: List[(Article, Map[Question, Score])] = List()
@@ -77,11 +92,14 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
       (FINAL, fin)
     ))
 
-  override def orderedScores(article: Article, question: ConferenceReviewing.Question): List[Score] = ???
+  private def getScores(article: Article, question: Question): List[Score] =
+    articles.filter(_._1 == article).map(_._2(question))
 
-  override def averageFinalScore(article: Article): Score = ???
+  override def orderedScores(article: Article, question: Question): List[Score] =
+    getScores(article, question).sorted
 
-  override def acceptedArticles: Set[Article] = ???
+  override def averageFinalScore(article: Article): Score =
+    getScores(article, FINAL).reduce(_ + _) / articles.count(_._1 == article)
 
   override def sortedAcceptedArticles: List[(Article, Score)] = ???
 
