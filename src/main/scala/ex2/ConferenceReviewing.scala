@@ -63,16 +63,18 @@ trait ConferenceReviewing {
 
 class ConferenceReviewingImpl extends ConferenceReviewing {
   export ConferenceReviewing.*
+  import ConferenceReviewing.*
+  import Question.*
   private var articles: List[(Article, Map[Question, Score])] = List()
 
   override def loadReview(article: Article, scores: Map[Question, Score]): Unit = articles = (article, scores) :: articles
 
   override def loadReview(article: Article,  relevance: Score, significance: Score, confidence: Score, fin: Score): Unit =
     loadReview(article, Map(
-      (Question.RELEVANCE, relevance),
-      (Question.SIGNIFICANCE, significance),
-      (Question.CONFIDENCE, confidence),
-      (Question.FINAL, fin)
+      (RELEVANCE, relevance),
+      (SIGNIFICANCE, significance),
+      (CONFIDENCE, confidence),
+      (FINAL, fin)
     ))
 
   override def orderedScores(article: Article, question: ConferenceReviewing.Question): List[Score] = ???
@@ -94,6 +96,7 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
  */
 @main def testConferenceReviewing(): Unit =
   import ConferenceReviewing.*
+  import Question.*
 
   val cr: ConferenceReviewing = new ConferenceReviewingImpl()
   val article1 = article(1)
@@ -116,17 +119,17 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
     cr.loadReview(article5, score(7), score(7), score(7), score(10)) // 7.0
 
     val map: Map[Question, Score] = Map(
-      (Question.RELEVANCE, score(8)),
-      (Question.SIGNIFICANCE, score(8)),
-      (Question.CONFIDENCE, score(7)),
-      (Question.FINAL, score(8))
+      (RELEVANCE, score(8)),
+      (SIGNIFICANCE, score(8)),
+      (CONFIDENCE, score(7)),
+      (FINAL, score(8))
     )
     cr.loadReview(article4, map)
 
   def testOrderedScores(): Unit =
-    println(cr.orderedScores(article2, Question.RELEVANCE))  // List(score(4), score(9))
-    println(cr.orderedScores(article4, Question.CONFIDENCE)) // List(score(6), score(7), score(8))
-    println(cr.orderedScores(article5, Question.FINAL))      // List(score(10), score(10))
+    println(cr.orderedScores(article2, RELEVANCE))  // List(score(4), score(9))
+    println(cr.orderedScores(article4, CONFIDENCE)) // List(score(6), score(7), score(8))
+    println(cr.orderedScores(article5, FINAL))      // List(score(10), score(10))
 
   def testAverageFinalScore(): Unit =
     println(cr.averageFinalScore(article1)) // score(8.5)
