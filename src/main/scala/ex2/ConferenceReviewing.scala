@@ -82,9 +82,9 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
   import Question.*
   val minAvgScore: Score = score(5)
   val minRelevanceScore: Score = score(8)
-  private var articles: List[(Article, Map[Question, Score])] = List()
+  private var reviews: List[(Article, Map[Question, Score])] = List()
 
-  override def loadReview(article: Article, scores: Map[Question, Score]): Unit = articles = (article, scores) :: articles
+  override def loadReview(article: Article, scores: Map[Question, Score]): Unit = reviews = (article, scores) :: reviews
 
   override def loadReview(article: Article,  relevance: Score, significance: Score, confidence: Score, fin: Score): Unit =
     loadReview(article, Map(
@@ -95,16 +95,16 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
     ))
 
   private def getScores(article: Article, question: Question): List[Score] =
-    articles.filter(_._1 == article).map(_._2(question))
+    reviews.filter(_._1 == article).map(_._2(question))
 
   override def orderedScores(article: Article, question: Question): List[Score] =
     getScores(article, question).sorted
 
   override def averageFinalScore(article: Article): Score =
-    getScores(article, FINAL).reduce(_ + _) / articles.count(_._1 == article)
+    getScores(article, FINAL).reduce(_ + _) / reviews.count(_._1 == article)
 
   private def acceptedArticlesWithScores: Set[(Article, Score)] =
-    articles
+    reviews
       .map((a, q) => (a, q, averageFinalScore(a)))
       .filter(_._3 > minAvgScore)
       .filter(_._2(RELEVANCE) >= minRelevanceScore)
@@ -118,7 +118,7 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
     acceptedArticlesWithScores.toList.sortBy(_._2)
 
   override def averageWeightedFinalScoreMap: Map[Article, Score] =
-    articles
+    reviews
       .groupBy(_._1)
       .map((a, group) => (a, group.map((_, q) => q(CONFIDENCE) * q(FINAL) / 10)))
       .map((a, scores) => (a, scores.reduce(_ + _) / scores.length))
