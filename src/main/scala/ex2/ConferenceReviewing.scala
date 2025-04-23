@@ -114,10 +114,14 @@ class ConferenceReviewingImpl extends ConferenceReviewing {
   override def acceptedArticles: Set[Article] =
     acceptedArticlesWithScores.map(_._1)
 
-  override def averageWeightedFinalScoreMap: Map[Article, Score] = ???
   override def sortedAcceptedArticles: List[(Article, Score)] =
     acceptedArticlesWithScores.toList.sortBy(_._2)
 
+  override def averageWeightedFinalScoreMap: Map[Article, Score] =
+    articles
+      .groupBy(_._1)
+      .map((a, group) => (a, group.map((_, q) => q(CONFIDENCE) * q(FINAL) / 10)))
+      .map((a, scores) => (a, scores.reduce(_ + _) / scores.length))
 }
 
 /**
