@@ -63,10 +63,17 @@ trait ConferenceReviewing {
 
 class ConferenceReviewingImpl extends ConferenceReviewing {
   export ConferenceReviewing.*
+  private var articles: List[(Article, Map[Question, Score])] = List()
 
-  override def loadReview(article: Article, scores: Map[ConferenceReviewing.Question, Score]): Unit = ???
+  override def loadReview(article: Article, scores: Map[Question, Score]): Unit = articles = (article, scores) :: articles
 
-  override def loadReview(article: Article, relevance: Score, significance: Score, confidence: Score, fin: Score): Unit = ???
+  override def loadReview(article: Article,  relevance: Score, significance: Score, confidence: Score, fin: Score): Unit =
+    loadReview(article, Map(
+      (Question.RELEVANCE, relevance),
+      (Question.SIGNIFICANCE, significance),
+      (Question.CONFIDENCE, confidence),
+      (Question.FINAL, fin)
+    ))
 
   override def orderedScores(article: Article, question: ConferenceReviewing.Question): List[Score] = ???
 
